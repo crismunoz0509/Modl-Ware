@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.shape.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" fx:id="background" onMouseClicked="#CanvasClick" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtesting.Controller">
+   <children>
+      <Button layoutX="14.0" layoutY="359.0" mnemonicParsing="false" onAction="#NodeButton" text="Nodes" />
+      <Button layoutX="85.0" layoutY="359.0" mnemonicParsing="false" onAction="#EdgeButton" text="Edges" />
+      <Pane id="Pane" fx:id="editpane" layoutX="9.0" layoutY="9.0" prefHeight="179.0" prefWidth="204.0" style="-fx-background-color: #CECECE;" visible="false">
+         <children>
+            <TextField layoutX="4.0" layoutY="8.0" prefHeight="27.0" prefWidth="188.0" text="set name..." />
+            <ColorPicker layoutX="6.0" layoutY="48.0" prefHeight="27.0" prefWidth="183.0" />
+            <Button layoutX="6.0" layoutY="143.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="184.0" text="SAVE" />
+            <Button layoutX="5.0" layoutY="83.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="186.0" text="Duplicate" />
+         </children>
+         <cursor>
+            <Cursor fx:constant="DEFAULT" />
+         </cursor>
+      </Pane>
+      <Button layoutX="165.0" layoutY="359.0" mnemonicParsing="false" onAction="#OutputClick" text="OUTPUT" />
+   </children>
+   <cursor>
+      <Cursor fx:constant="CROSSHAIR" />
+   </cursor>
+</AnchorPane>
