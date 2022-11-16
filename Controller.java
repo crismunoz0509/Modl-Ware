@@ -11,6 +11,7 @@ import javafx.scene.text.Font;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -30,23 +31,14 @@ public class Controller
       }
    }
    
-   public void NodeClicked(MouseEvent event)
-   {
-      System.out.println("clicked group");
-   }
-   
    public void NodeButton()
    {
       Nodes.NodeButtonOn();
-      Edge.EdgeToolOff(background);
-      Nodes.NodeToolOn(background);
    }
    
    public void EdgeButton()
    {
-      Edge.EdgeToolOn();
-      Nodes.NodeButtonOff();
-      Nodes.NodeToolOff(background);
+      Edge.EdgeButtonOn();
    }
    
    public void OutputClick() throws FileNotFoundException

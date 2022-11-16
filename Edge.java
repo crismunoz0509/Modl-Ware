@@ -1,24 +1,26 @@
 package javafxtesting;
 
 import javafx.fxml.FXML;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.Node;
 import javafx.scene.Group;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.Cursor;
+import javafx.scene.paint.Color;
+
 
 import java.util.Scanner;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import javafx.scene.Cursor;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+
 import static javafxtesting.Nodes.GetNodeButton;
 import static javafxtesting.Nodes.NodeToolOff;
 import static javafxtesting.Nodes.NodeToolOn;
@@ -28,20 +30,23 @@ public class Edge
 {
    private int edge_weight;
    private int edge_num;
-   private String relation_name = null;
-   private Line edge_self;
-   private Nodes node_down;
-   private Nodes node_end;
-   private boolean down_point_connection;
-   private Group edge_group = new Group();
-   private Text edge_text;
-   private boolean open_menu;
-   private AnchorPane background;
    private double startX;
    private double startY;
+   private boolean down_point_connection;
+   private boolean open_menu;
+   
+   
+   private String relation_name = null;
+   private Nodes node_down;
+   private Nodes node_end;
+   private Group edge_group = new Group();
+   private Text edge_text;
+   private Line edge_self;
    
    private static int edge_count = 0;
    private static boolean edge_tool;
+   
+   private static AnchorPane background;
    
    public Edge(String relation, double pos_arr[], Nodes node_down, Nodes node_end, AnchorPane background)
    {
@@ -105,7 +110,7 @@ public class Edge
       return relation_name;
    }
    
-   public static void EdgeToolOff(AnchorPane background)
+   public static void EdgeToolOff()
    {
       edge_tool = false;
       background.setCursor(Cursor.DEFAULT);
@@ -174,5 +179,12 @@ public class Edge
          node.setTranslateX(events.getSceneX() - startX);
          node.setTranslateY(events.getSceneY() - startY);
       });
+   }
+   
+   public static void EdgeButtonOn()
+   {
+      Nodes.NodeButtonOff();
+      Nodes.NodeToolOff();
+      EdgeToolOn();
    }
 }

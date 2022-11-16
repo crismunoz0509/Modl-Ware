@@ -1,79 +1,78 @@
 package javafxtesting;
 
 import javafx.fxml.FXML;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.Group;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.Font;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
+import javafx.scene.paint.Color;
+import javafx.scene.Group;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 
 
 public class Nodes
 {
    @FXML
    
-   private int node_num;
-   private double startX;
-   private double startY;
    private final int NODEWIDTH = 75;
    private final int NODEHEIGHT = 75;
    private final int TEXTPADDINGHORIZONTAL = 5;
    
-   private static int node_count;
+   private double translate_startX;
+   private double translate_startY;
    
+   private String node_name;
+   private Pane edit_menu_pane;
+   private Group node_group = new Group();
+   private Text node_display_text;
+   private Rectangle node_display_shape;
+   private Edge single_edge_single_relationships;
+   private ArrayList<Edge> edge_list = new ArrayList<>();
+   
+   
+   private static int node_count;
    private static double down_points[] = new double[4];
    private static boolean open_menu = false;
    private static boolean node_tool = true;
    private static boolean node_hover = false;
    private static boolean node_button = false;
-   private static ArrayList<Nodes> relationships = new ArrayList<>();
    
-   private String node_name;
-   private Rectangle node_shape;
-   private ArrayList<Edge> edge_list = new ArrayList<>();
-   private ArrayList<Boolean> down_point_connection = new ArrayList<>();
-   private AnchorPane background;
-   private Pane editpane;
-   private Group group = new Group();
-   private Node selected_node;
-   private Edge single_edge;
+   private static ArrayList<Nodes> relationships = new ArrayList<>();
+   private static AnchorPane background;
    private static Nodes node_down;
    private static Nodes node_end;
-   private Text node_text;
    
    public Nodes(String node_name, MouseEvent event, AnchorPane background, Pane pane)
    {
       this.node_name = node_name;
       this.background = background;
-      this.editpane = pane;
+      this.edit_menu_pane = pane;
       
-      Rectangle new_node = new Rectangle(event.getSceneX() - (NODEWIDTH / 2), event.getSceneY() - (NODEHEIGHT / 2), NODEWIDTH, NODEHEIGHT);
-      Text node_text = new Text(new_node.getX() + TEXTPADDINGHORIZONTAL, new_node.getY() + (NODEHEIGHT / 2), node_name);
+      node_display_shape = new Rectangle(event.getSceneX() - (NODEWIDTH / 2), event.getSceneY() - (NODEHEIGHT / 2), NODEWIDTH, NODEHEIGHT);
+      node_display_text = new Text(node_display_shape.getX() + TEXTPADDINGHORIZONTAL, node_display_shape.getY() + (NODEHEIGHT / 2), node_name);
       
-      node_text.setWrappingWidth(NODEWIDTH - TEXTPADDINGHORIZONTAL);
-      node_text.setFont(Font.font("Times New Roman", 20));
+      node_display_text.setWrappingWidth(NODEWIDTH - TEXTPADDINGHORIZONTAL);
+      node_display_text.setFont(Font.font("Times New Roman", 20));
       
-      new_node.setFill(Color.ORANGE);
-      new_node.setStroke(Color.BLACK);
-      new_node.setStrokeWidth(3.0);
+      node_display_shape.setFill(Color.ORANGE);
+      node_display_shape.setStroke(Color.BLACK);
+      node_display_shape.setStrokeWidth(3.0);
       
-      group.setOnMouseClicked(events -> {
+      node_group.setOnMouseClicked(events -> {
          if(Edge.GetEdgeTool())
          {
             AddEdge(events, this);
@@ -89,45 +88,13 @@ public class Nodes
          }
       });
       
-      DraggableAndDisableNode(group);
+      DraggableAndDisableNode(node_group);
       
-      group.setOnMousePressed(events -> {
-         startX = events.getSceneX() - group.getTranslateX();
-         startY = events.getSceneY() - group.getTranslateY();
-      });
+      node_group.getChildren().add(node_display_shape);
+      node_group.getChildren().add(node_display_text);
       
-      group.setOnMouseDragged(events ->{
-         group.setTranslateX(events.getSceneX() - startX);
-         group.setTranslateY(events.getSceneY() - startY);
-         
-         int count = 0;
-         System.out.print(edge_list);
-         System.out.print(down_point_connection);
-         for(Edge it : edge_list)
-         {
-            
-            if(down_point_connection.get(count))
-            {
-               it.GetEdge().setStartX(node_shape.getX() + (node_shape.getWidth() / 2));
-               it.GetEdge().setStartY(node_shape.getY() + (node_shape.getHeight() / 2));
-            }
-            else
-            {
-               it.GetEdge().setEndX(node_shape.getX() + (node_shape.getWidth() / 2));
-               it.GetEdge().setEndY(node_shape.getY() + (node_shape.getHeight() / 2));
-            }
-            count += 1;
-         }
-      });
-      
-      node_shape = new_node;
-      this.node_text = node_text;
-      
-      group.getChildren().add(node_shape);
-      group.getChildren().add(node_text);
-      
-      this.background.getChildren().add(group);
-      node_num = node_count++;
+      this.background.getChildren().add(node_group);
+      node_count++;
    }
    
    public String GetNodeName()
@@ -161,14 +128,14 @@ public class Nodes
       text_field.setText(node_name);
       
       confirm.setOnAction(eh -> {
-         node_text.setText(text_field.getText());
+         node_display_text.setText(text_field.getText());
          node_name = text_field.getText();
-         node_shape.setStroke(Color.BLACK);
+         node_display_shape.setStroke(Color.BLACK);
          background.getChildren().remove(edit_menu);
          open_menu = false;
       });
       
-      node_shape.setStroke(Color.GREY);
+      node_display_shape.setStroke(Color.GREY);
       
       AnchorPane.setTopAnchor(text_field, 10.0);
       AnchorPane.setLeftAnchor(text_field, 10.0);
@@ -190,21 +157,18 @@ public class Nodes
          if(node_down == null)
          {
             node_down = node;
-            down_points[0] = node.node_shape.getX() + (node.node_shape.getWidth() / 2);
-            down_points[1] = node.node_shape.getY() + (node.node_shape.getHeight() / 2);
+            down_points[0] = node.GetShape().getX() + (node.GetShape().getWidth() / 2);
+            down_points[1] = node.GetShape().getY() + (node.GetShape().getHeight() / 2);
          }
          else
          {
             node_end = node;
-            down_points[2] = node.node_shape.getX() + (node.node_shape.getWidth() / 2);
-            down_points[3] = node.node_shape.getY() + (node.node_shape.getHeight() / 2);
+            down_points[2] = node.GetShape().getX() + (node.GetShape().getWidth() / 2);
+            down_points[3] = node.GetShape().getY() + (node.GetShape().getHeight() / 2);
             Edge edge = new Edge("relation", down_points, node_down, node_end, background);
             
             node_down.AddEdge(edge);
-            node_down.down_point_connection.add(true);
             AddEdge(edge);
-            down_point_connection.add(false);
-            
             
             relationships.add(node_down);
             relationships.add(node_end);
@@ -212,7 +176,7 @@ public class Nodes
             node_down = null;
             node_end = null;
 
-            single_edge = edge;
+            single_edge_single_relationships = edge;
             background.getChildren().add(edge.GetEdgeGroup());
          }
       }
@@ -220,7 +184,7 @@ public class Nodes
    
    public String GetRelationShip()
    {
-      return single_edge.GetRelationName();
+      return single_edge_single_relationships.GetRelationName();
    }
    
    public static ArrayList GetRelationships()
@@ -230,7 +194,7 @@ public class Nodes
    
    public Rectangle GetShape()
    {
-      return node_shape;
+      return node_display_shape;
    }
    
    public void AddEdge(Edge edge)
@@ -241,6 +205,8 @@ public class Nodes
    public static void NodeButtonOn()
    {
       node_button = true;
+      NodeToolOn();
+      Edge.EdgeToolOff();
    }
    
    public static void NodeButtonOff()
@@ -253,13 +219,13 @@ public class Nodes
       return node_button;
    }
    
-   public static void NodeToolOn(AnchorPane background)
+   public static void NodeToolOn()
    {
       node_tool = true;
       background.setCursor(Cursor.CROSSHAIR);
    }
    
-   public static void NodeToolOff(AnchorPane background)
+   public static void NodeToolOff()
    {
       node_tool = false;
       background.setCursor(Cursor.DEFAULT);
@@ -281,7 +247,7 @@ public class Nodes
          if(GetNodeButton())
          {
             background.setCursor(Cursor.DEFAULT);
-            NodeToolOff(background);
+            NodeToolOff();
             NodeHoverOn();
          }
       });
@@ -290,19 +256,19 @@ public class Nodes
          if(GetNodeButton())
          {
             background.setCursor(Cursor.CROSSHAIR);
-            NodeToolOn(background);
+            NodeToolOn();
             NodeHoverOff();
          }
       });
       
       node.setOnMousePressed(events -> {
-         startX = events.getSceneX() - node.getTranslateX();
-         startY = events.getSceneY() - node.getTranslateY();
+         translate_startX = events.getSceneX() - node.getTranslateX();
+         translate_startY = events.getSceneY() - node.getTranslateY();
       });
       
       node.setOnMouseDragged(events ->{
-         node.setTranslateX(events.getSceneX() - startX);
-         node.setTranslateY(events.getSceneY() - startY);
+         node.setTranslateX(events.getSceneX() - translate_startX);
+         node.setTranslateY(events.getSceneY() - translate_startY);
       });
    }
 }
