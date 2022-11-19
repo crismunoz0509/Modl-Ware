@@ -20,25 +20,24 @@ import java.io.FileNotFoundException;
 public class Controller
 {   
    @FXML
-   private AnchorPane background;
    private Pane editpane;
    
    public void CanvasClick(MouseEvent event)
    {
-      if(Nodes.GetNodeButton() && Nodes.GetNodeTool())
+      if(GraphItem.GetNodeButton() && GraphItem.GetNodeTool())
       {
-         Nodes new_node = new Nodes("random_name", event, background, editpane);
+         Nodes new_node = new Nodes("random_name", event, GraphItem.GetBackground(), editpane);
       }
    }
    
    public void NodeButton()
    {
-      Nodes.NodeButtonOn();
+      GraphItem.NodeButtonOn();
    }
    
    public void EdgeButton()
    {
-      Edge.EdgeButtonOn();
+      GraphItem.EdgeButtonOn();
    }
    
    public void OutputClick() throws FileNotFoundException

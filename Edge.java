@@ -21,12 +21,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 
-import static javafxtesting.Nodes.GetNodeButton;
-import static javafxtesting.Nodes.NodeToolOff;
-import static javafxtesting.Nodes.NodeToolOn;
 
-
-public class Edge
+public class Edge extends GraphItem
 {
    private int edge_weight;
    private int edge_num;
@@ -44,12 +40,10 @@ public class Edge
    private Line edge_self;
    
    private static int edge_count = 0;
-   private static boolean edge_tool;
-   
-   private static AnchorPane background;
    
    public Edge(String relation, double pos_arr[], Nodes node_down, Nodes node_end, AnchorPane background)
    {
+      super(background);
       this.relation_name = relation;
       Line new_edge = new Line(pos_arr[0], pos_arr[1], pos_arr[2], pos_arr[3]);
       Text edge_text = new Text(Math.abs((pos_arr[0] - pos_arr[2]) / 2) + pos_arr[0], Math.abs((pos_arr[1] - pos_arr[3]) / 2) + pos_arr[1], relation);
@@ -62,7 +56,6 @@ public class Edge
       this.node_down = node_down;
       this.node_end = node_end;
       this.edge_text = edge_text;
-      this.background = background;
       
       edge_group.getChildren().addAll(new_edge, edge_text);
       edge_group.setOnMouseClicked(eh -> {
@@ -95,11 +88,6 @@ public class Edge
       return edge_count;
    }
    
-   public static boolean GetEdgeTool()
-   {
-      return edge_tool;
-   }
-   
    public Line GetEdge()
    {
       return edge_self;
@@ -110,18 +98,7 @@ public class Edge
       return relation_name;
    }
    
-   public static void EdgeToolOff()
-   {
-      edge_tool = false;
-      background.setCursor(Cursor.DEFAULT);
-   }
-   
-   public static void EdgeToolOn()
-   {
-      edge_tool = true;
-   }
-   
-      public void EditEdge(MouseEvent event, AnchorPane background)
+   public void EditEdge(MouseEvent event, AnchorPane background)
    {
       AnchorPane edit_menu = new AnchorPane();
       TextField text_field = new TextField();
@@ -159,14 +136,14 @@ public class Edge
       node.setOnMouseEntered(events -> {
          if(GetNodeButton())
          {
-            background.setCursor(Cursor.OPEN_HAND);
+            GetBackground().setCursor(Cursor.OPEN_HAND);
          }
       });
       
       node.setOnMouseExited(events -> {
          if(GetNodeButton())
          {
-            background.setCursor(Cursor.DEFAULT);
+            GetBackground().setCursor(Cursor.DEFAULT);
          }
       });
       

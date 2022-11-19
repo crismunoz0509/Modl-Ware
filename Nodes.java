@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 
 
-public class Nodes
+public class Nodes extends GraphItem
 {
    @FXML
    
@@ -47,19 +47,16 @@ public class Nodes
    private static int node_count;
    private static double down_points[] = new double[4];
    private static boolean open_menu = false;
-   private static boolean node_tool = true;
    private static boolean node_hover = false;
-   private static boolean node_button = false;
    
    private static ArrayList<Nodes> relationships = new ArrayList<>();
-   private static AnchorPane background;
    private static Nodes node_down;
    private static Nodes node_end;
    
    public Nodes(String node_name, MouseEvent event, AnchorPane background, Pane pane)
    {
+      super(background);
       this.node_name = node_name;
-      this.background = background;
       this.edit_menu_pane = pane;
       
       node_display_shape = new Rectangle(event.getSceneX() - (NODEWIDTH / 2), event.getSceneY() - (NODEHEIGHT / 2), NODEWIDTH, NODEHEIGHT);
@@ -93,7 +90,7 @@ public class Nodes
       node_group.getChildren().add(node_display_shape);
       node_group.getChildren().add(node_display_text);
       
-      this.background.getChildren().add(node_group);
+      GetBackground().getChildren().add(node_group);
       node_count++;
    }
    
@@ -131,7 +128,7 @@ public class Nodes
          node_display_text.setText(text_field.getText());
          node_name = text_field.getText();
          node_display_shape.setStroke(Color.BLACK);
-         background.getChildren().remove(edit_menu);
+         GetBackground().getChildren().remove(edit_menu);
          open_menu = false;
       });
       
@@ -147,7 +144,7 @@ public class Nodes
       DraggableAndDisableNode(edit_menu);
       
       edit_menu.getChildren().addAll(confirm, text_field);
-      background.getChildren().add(edit_menu);
+      GetBackground().getChildren().add(edit_menu);
    }
    
    public void AddEdge(MouseEvent event, Nodes node)
@@ -165,7 +162,7 @@ public class Nodes
             node_end = node;
             down_points[2] = node.GetShape().getX() + (node.GetShape().getWidth() / 2);
             down_points[3] = node.GetShape().getY() + (node.GetShape().getHeight() / 2);
-            Edge edge = new Edge("relation", down_points, node_down, node_end, background);
+            Edge edge = new Edge("relation", down_points, node_down, node_end, GetBackground());
             
             node_down.AddEdge(edge);
             AddEdge(edge);
@@ -177,7 +174,7 @@ public class Nodes
             node_end = null;
 
             single_edge_single_relationships = edge;
-            background.getChildren().add(edge.GetEdgeGroup());
+            GetBackground().getChildren().add(edge.GetEdgeGroup());
          }
       }
    }
@@ -202,62 +199,19 @@ public class Nodes
       edge_list.add(edge);
    }
    
-   public static void NodeButtonOn()
-   {
-      node_button = true;
-      NodeToolOn();
-      Edge.EdgeToolOff();
-   }
-   
-   public static void NodeButtonOff()
-   {
-      node_button = false;
-   }
-   
-   public static boolean GetNodeButton()
-   {
-      return node_button;
-   }
-   
-   public static void NodeToolOn()
-   {
-      node_tool = true;
-      background.setCursor(Cursor.CROSSHAIR);
-   }
-   
-   public static void NodeToolOff()
-   {
-      node_tool = false;
-      background.setCursor(Cursor.DEFAULT);
-   }
-   
-   public static boolean GetNodeTool()
-   {
-      return node_tool;
-   }
-   
-   public static int GetNodeCount()
-   {
-      return node_count;
-   }
-   
    public void DraggableAndDisableNode(Node node)
    {
       node.setOnMouseEntered(events -> {
          if(GetNodeButton())
          {
-            background.setCursor(Cursor.DEFAULT);
-            NodeToolOff();
-            NodeHoverOn();
+            GetBackground().setCursor(Cursor.OPEN_HAND);
          }
       });
       
       node.setOnMouseExited(events -> {
          if(GetNodeButton())
          {
-            background.setCursor(Cursor.CROSSHAIR);
-            NodeToolOn();
-            NodeHoverOff();
+            GetBackground().setCursor(Cursor.DEFAULT);
          }
       });
       
