@@ -26,8 +26,6 @@ public class Edge extends GraphItem
 {
    private int edge_weight;
    private int edge_num;
-   private double startX;
-   private double startY;
    private boolean down_point_connection;
    private boolean open_menu;
    
@@ -43,7 +41,6 @@ public class Edge extends GraphItem
    
    public Edge(String relation, double pos_arr[], Nodes node_down, Nodes node_end, AnchorPane background)
    {
-      super(background);
       this.relation_name = relation;
       Line new_edge = new Line(pos_arr[0], pos_arr[1], pos_arr[2], pos_arr[3]);
       Text edge_text = new Text(Math.abs((pos_arr[0] - pos_arr[2]) / 2) + pos_arr[0], Math.abs((pos_arr[1] - pos_arr[3]) / 2) + pos_arr[1], relation);
@@ -125,37 +122,18 @@ public class Edge extends GraphItem
       AnchorPane.setTopAnchor(confirm, 10.0);
       AnchorPane.setRightAnchor(confirm, 10.0);
       
-      DraggableAndDisableNode(edit_menu);
+      edit_menu.setOnMousePressed(events -> {
+         SetStartX(events.getSceneX() - edit_menu.getTranslateX());
+         SetStartY(events.getSceneY() - edit_menu.getTranslateY());
+      });
+      
+      edit_menu.setOnMouseDragged(events ->{
+         edit_menu.setTranslateX(events.getSceneX() - GetStartX());
+         edit_menu.setTranslateY(events.getSceneY() - GetStartY());
+      });
       
       edit_menu.getChildren().addAll(confirm, text_field);
       background.getChildren().add(edit_menu);
-   }
-      
-   public void DraggableAndDisableNode(Node node)
-   {
-      node.setOnMouseEntered(events -> {
-         if(GetNodeButton())
-         {
-            GetBackground().setCursor(Cursor.OPEN_HAND);
-         }
-      });
-      
-      node.setOnMouseExited(events -> {
-         if(GetNodeButton())
-         {
-            GetBackground().setCursor(Cursor.DEFAULT);
-         }
-      });
-      
-      node.setOnMousePressed(events -> {
-         startX = events.getSceneX() - node.getTranslateX();
-         startY = events.getSceneY() - node.getTranslateY();
-      });
-      
-      node.setOnMouseDragged(events ->{
-         node.setTranslateX(events.getSceneX() - startX);
-         node.setTranslateY(events.getSceneY() - startY);
-      });
    }
    
    public static void EdgeButtonOn()

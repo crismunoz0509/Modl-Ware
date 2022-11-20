@@ -32,11 +32,7 @@ public class Nodes extends GraphItem
    private final int NODEHEIGHT = 75;
    private final int TEXTPADDINGHORIZONTAL = 5;
    
-   private double translate_startX;
-   private double translate_startY;
-   
    private String node_name;
-   private Pane edit_menu_pane;
    private Group node_group = new Group();
    private Text node_display_text;
    private Rectangle node_display_shape;
@@ -53,11 +49,9 @@ public class Nodes extends GraphItem
    private static Nodes node_down;
    private static Nodes node_end;
    
-   public Nodes(String node_name, MouseEvent event, AnchorPane background, Pane pane)
+   public Nodes(String node_name, MouseEvent event)
    {
-      super(background);
       this.node_name = node_name;
-      this.edit_menu_pane = pane;
       
       node_display_shape = new Rectangle(event.getSceneX() - (NODEWIDTH / 2), event.getSceneY() - (NODEHEIGHT / 2), NODEWIDTH, NODEHEIGHT);
       node_display_text = new Text(node_display_shape.getX() + TEXTPADDINGHORIZONTAL, node_display_shape.getY() + (NODEHEIGHT / 2), node_name);
@@ -69,23 +63,7 @@ public class Nodes extends GraphItem
       node_display_shape.setStroke(Color.BLACK);
       node_display_shape.setStrokeWidth(3.0);
       
-      node_group.setOnMouseClicked(events -> {
-         if(Edge.GetEdgeTool())
-         {
-            AddEdge(events, this);
-         }
-         
-         if(GetNodeButton())
-         {
-            if(CheckNodeHover() && !open_menu)
-            {
-               EditNode(events);
-               open_menu = true;
-            }
-         }
-      });
-      
-      DraggableAndDisableNode(node_group);
+      NodeFunctions(node_group);
       
       node_group.getChildren().add(node_display_shape);
       node_group.getChildren().add(node_display_text);
@@ -115,7 +93,7 @@ public class Nodes extends GraphItem
    }
    
    public void EditNode(MouseEvent event)
-   {
+   {      
       AnchorPane edit_menu = new AnchorPane();
       TextField text_field = new TextField();
       Button confirm = new Button("Confirm");
@@ -141,7 +119,15 @@ public class Nodes extends GraphItem
       AnchorPane.setTopAnchor(confirm, 10.0);
       AnchorPane.setRightAnchor(confirm, 10.0);
       
-      DraggableAndDisableNode(edit_menu);
+      edit_menu.setOnMousePressed(events -> {
+         SetStartX(events.getSceneX() - edit_menu.getTranslateX());
+         SetStartY(events.getSceneY() - edit_menu.getTranslateY());
+      });
+      
+      edit_menu.setOnMouseDragged(events ->{
+         edit_menu.setTranslateX(events.getSceneX() - GetStartX());
+         edit_menu.setTranslateY(events.getSceneY() - GetStartY());
+      });
       
       edit_menu.getChildren().addAll(confirm, text_field);
       GetBackground().getChildren().add(edit_menu);
@@ -199,30 +185,40 @@ public class Nodes extends GraphItem
       edge_list.add(edge);
    }
    
-   public void DraggableAndDisableNode(Node node)
+   public void NodeFunctions(Node node)
    {
       node.setOnMouseEntered(events -> {
          if(GetNodeButton())
          {
-            GetBackground().setCursor(Cursor.OPEN_HAND);
+            NodeHoverOn();
+            NodeToolOff();
+            GetBackground().setCursor(Cursor.DEFAULT);
          }
       });
       
       node.setOnMouseExited(events -> {
          if(GetNodeButton())
          {
-            GetBackground().setCursor(Cursor.DEFAULT);
+            NodeHoverOff();
+            NodeToolOn();
+            GetBackground().setCursor(Cursor.CROSSHAIR);
          }
       });
       
-      node.setOnMousePressed(events -> {
-         translate_startX = events.getSceneX() - node.getTranslateX();
-         translate_startY = events.getSceneY() - node.getTranslateY();
-      });
-      
-      node.setOnMouseDragged(events ->{
-         node.setTranslateX(events.getSceneX() - translate_startX);
-         node.setTranslateY(events.getSceneY() - translate_startY);
+      node.setOnMouseClicked(events -> {
+         if(Edge.GetEdgeTool())
+         {
+            AddEdge(events, this);
+         }
+         
+         if(GetNodeButton())
+         {
+            if(CheckNodeHover() && !open_menu)
+            {
+               EditNode(events);
+               open_menu = true;
+            }
+         }
       });
    }
 }

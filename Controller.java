@@ -17,26 +17,28 @@ import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 
 
-public class Controller
+public class Controller extends GraphItem
 {   
    @FXML
-   private Pane editpane;
+   private AnchorPane background;
    
    public void CanvasClick(MouseEvent event)
    {
       if(GraphItem.GetNodeButton() && GraphItem.GetNodeTool())
       {
-         Nodes new_node = new Nodes("random_name", event, GraphItem.GetBackground(), editpane);
+         Nodes new_node = new Nodes("random_name", event);
       }
    }
    
    public void NodeButton()
    {
+      SetBackground(background);
       GraphItem.NodeButtonOn();
    }
    
    public void EdgeButton()
    {
+      SetBackground(background);
       GraphItem.EdgeButtonOn();
    }
    

@@ -4,22 +4,20 @@ import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 
 class GraphItem
 {
-   @FXML
-           
    private static AnchorPane background;
+   private static Pane edit_menu;
+   
+   private double translate_startX;
+   private double translate_startY;
    
    private static boolean node_button;
    private static boolean node_tool;
    private static boolean edge_button;
    private static boolean edge_tool;
-   
-   GraphItem(AnchorPane background)
-   {
-      this.background = background;
-   }
    
    public static void NodeButtonOn()
    {
@@ -67,6 +65,21 @@ class GraphItem
       edge_tool = false;
    }
    
+   public void SetStartX(double newX)
+   {
+      translate_startX = newX;
+   }
+   
+   public void SetStartY(double newY)
+   {
+      translate_startY = newY;
+   }
+   
+   public static void SetBackground(AnchorPane newback)
+   {
+      background = newback;
+   }
+   
    public static boolean GetEdgeButton()
    {
       return edge_button;
@@ -87,8 +100,23 @@ class GraphItem
       return edge_tool;
    }
    
+   public double GetStartX()
+   {
+      return translate_startX;
+   }
+   
+   public double GetStartY()
+   {
+      return translate_startY;
+   }
+   
    public static AnchorPane GetBackground()
    {
       return background;
+   }
+   
+   public static Pane GetEditPane()
+   {
+      return edit_menu;
    }
 }
