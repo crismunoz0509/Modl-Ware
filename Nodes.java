@@ -19,6 +19,8 @@ import javafx.event.ActionEvent;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -36,8 +38,9 @@ public class Nodes extends GraphItem
    private Group node_group = new Group();
    private Text node_display_text;
    private Rectangle node_display_shape;
-   private Edge single_edge_single_relationships;
+//   private Edge single_edge_single_relationships;
    private ArrayList<Edge> edge_list = new ArrayList<>();
+   private ArrayList<Nodes> relationships = new ArrayList<>();
    
    
    private static int node_count;
@@ -45,7 +48,6 @@ public class Nodes extends GraphItem
    private static boolean open_menu = false;
    private static boolean node_hover = false;
    
-   private static ArrayList<Nodes> relationships = new ArrayList<>();
    private static Nodes node_down;
    private static Nodes node_end;
    
@@ -150,29 +152,68 @@ public class Nodes extends GraphItem
             down_points[3] = node.GetShape().getY() + (node.GetShape().getHeight() / 2);
             Edge edge = new Edge("relation", down_points, node_down, node_end, GetBackground());
             
-            node_down.AddEdge(edge);
-            AddEdge(edge);
+            node_end.AddEdgeList(edge);
             
-            relationships.add(node_down);
-            relationships.add(node_end);
+            node_down.relationships.add(node_end);
 
             node_down = null;
             node_end = null;
 
-            single_edge_single_relationships = edge;
+//            single_edge_single_relationships = edge;
             GetBackground().getChildren().add(edge.GetEdgeGroup());
          }
       }
    }
+//   
+//   public String GetRelationShip()
+//   {
+//      return single_edge_single_relationships.GetRelationName();
+//   }
    
-   public String GetRelationShip()
+//   public static ArrayList GetRelationships()
+//   {
+//      return relationships;
+//   }
+   
+   public HashMap<String, ArrayList<String>> GetAllRelationships(Nodes check_node)
    {
-      return single_edge_single_relationships.GetRelationName();
+      String key = null;
+      String value = null;
+      String output = "";
+      
+      HashMap<String, ArrayList<String>> sorted_relationships = new HashMap();
+      for(Nodes node_it : relationships)
+      {
+         ArrayList<Edge> edges = node_it.GetEdgeList();
+         String temp_node_name = node_it.GetNodeName();
+         for(Edge edge_it : edges)
+         {
+            String edge_name = edge_it.GetRelationName();
+            if(edge_it.GetNodeDown() == check_node)
+            {
+               if(sorted_relationships.containsKey(edge_name))
+               {
+                  if(!sorted_relationships.get(edge_name).contains(temp_node_name))
+                  {
+                     sorted_relationships.get(edge_name).add(temp_node_name);
+                  }
+               }
+               else
+               {
+                  ArrayList<String> values = new ArrayList<>();
+                  values.add(temp_node_name);
+                  sorted_relationships.put(edge_name, values);
+               }
+            }
+         }
+      }
+      
+      return sorted_relationships;
    }
    
-   public static ArrayList GetRelationships()
+   public ArrayList<Edge> GetEdgeList()
    {
-      return relationships;
+      return edge_list;
    }
    
    public Rectangle GetShape()
@@ -180,7 +221,7 @@ public class Nodes extends GraphItem
       return node_display_shape;
    }
    
-   public void AddEdge(Edge edge)
+   public void AddEdgeList(Edge edge)
    {
       edge_list.add(edge);
    }
