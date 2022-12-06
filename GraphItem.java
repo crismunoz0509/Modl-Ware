@@ -1,8 +1,5 @@
 package javafxtesting;
 
-import javafx.fxml.FXML;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
@@ -23,7 +20,7 @@ class GraphItem
    {
       node_button = true;
       NodeToolOn();
-      Edge.EdgeToolOff();
+      Edges.EdgeToolOff();
    }
    
    public static void NodeButtonOff()

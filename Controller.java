@@ -3,17 +3,12 @@ package javafxtesting;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
 
-import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
-import java.lang.StringBuilder;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -23,15 +18,16 @@ public class Controller extends GraphItem
 {   
    @FXML
    private AnchorPane background;
-   private ArrayList<Nodes> all_nodes = new ArrayList<>();
-   private HashMap<String, Integer> name_count = new HashMap<>();
+   
+   private Set<Signature> all_sigs = new HashSet<>();
+   private HashMap<String, Integer> sig_count = new HashMap<>();
+   private HashMap<String, ArrayList<Nodes>> sorted_nodes = new HashMap<>();
    
    public void CanvasClick(MouseEvent event)
    {
       if(GraphItem.GetNodeButton() && GraphItem.GetNodeTool())
       {
          Nodes new_node = new Nodes("random_name", event);
-         all_nodes.add(new_node);
       }
    }
    
@@ -49,58 +45,72 @@ public class Controller extends GraphItem
    
    public void OutputClick() throws FileNotFoundException
    {
-      File fh = new File("alloy_model.als");
+      File fh = new File("/Users/crismunoz/Desktop/Research/software-modeling/alloy_files/alloy_model.als");
       PrintWriter out = new PrintWriter(fh);
       
-      for(Nodes it : all_nodes)
+      all_sigs = new HashSet<>();
+      sorted_nodes = new HashMap<>();
+      
+      // sort all nodes by their signature
+      for(Nodes it : Nodes.GetAllNodes())
       {
-         if(name_count.containsKey(it.GetNodeName()))
+         String node_name = it.GetNodeName();
+         if(sorted_nodes.containsKey(node_name))
          {
-            name_count.replace(it.GetNodeName(), name_count.get(it.GetNodeName()) + 1);
+            ArrayList<Nodes> stored_nodes = sorted_nodes.get(node_name);
+            stored_nodes.add(it);
+            
+            int value = sig_count.get(node_name) + 1;
+            sig_count.replace(node_name, value);
          }
          else
          {
-            name_count.put(it.GetNodeName(), 1);
+            ArrayList<Nodes> stored_nodes = new ArrayList<>();
+            stored_nodes.add(it);
+            sorted_nodes.put(node_name, stored_nodes);
+            
+            sig_count.put(node_name, 1);
          }
       }
       
-      for(Nodes it : all_nodes)
+      // create a signature object from each hashmap element < name, list of nodes w/ name >
+      for(Map.Entry map_it : sorted_nodes.entrySet())
       {
-         String key = null;
-         ArrayList<String> value = null;
-         HashMap<String, ArrayList<String>> hash = it.GetAllRelationships(it);
+         String key = (String)map_it.getKey();
+         ArrayList<Nodes> value = (ArrayList<Nodes>)map_it.getValue();
          
-         if(name_count.get(it.GetNodeName()) == 1)
-         {
-            out.printf("lone sig %s { ", it.GetNodeName());
-         }
-         else
-         {
-            out.printf("some sig %s { ", it.GetNodeName());
-         }
-         
-         for(Map.Entry iterator : hash.entrySet())
-         {
-            key = (String)iterator.getKey();
-            value = (ArrayList)iterator.getValue();
-            
-            out.printf("%s : ", key);
-            for(int index = 0; index < value.size(); index++)
-            {
-               if(index == value.size() - 1)
-               {
-                  out.printf("%s", value.get(index));
-               }
-               else
-               {
-                  out.printf("%s + ", value.get(index));
-               }
-            }
-            out.print(", ");
-         }
-         
-         out.print("}\n");
+         Signature new_sig = new Signature(key, value);
+         all_sigs.add(new_sig);
       }
+      
+      
+      for(Signature it : all_sigs)
+      {
+         String full_output = "";
+         
+         it.CheckRelationType();
+         
+         full_output = full_output.concat(String.format("sig %s\n{\n", it.GetName()));
+         full_output = full_output.concat(it.GetRelationshipPrint());
+         full_output = full_output.concat("}\n\n");
+         out.print(full_output);
+      }
+      
+      String output = "run {} for ";
+      if(all_sigs.size() > 0)
+      {
+         for(Map.Entry map_it : sig_count.entrySet())
+         {
+            String key = (String)map_it.getKey();
+            int value = (Integer)map_it.getValue();
+            
+            output = output.concat(String.format("exactly %s %s, ", String.valueOf(value), key));
+         }
+      }
+      
+      output = output.trim();
+      output = output.substring(0, output.length() - 1);
+      out.println(output);
       
       out.close();
    }
