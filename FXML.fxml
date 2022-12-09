@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.shape.*?>
 <?import java.lang.*?>
@@ -8,10 +9,17 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" fx:id="background" onMouseClicked="#CanvasClick" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtesting.Controller">
+<AnchorPane id="AnchorPane" fx:id="background" onMouseClicked="#CanvasClick" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtesting.Controller">
    <children>
-      <Button layoutX="14.0" layoutY="359.0" mnemonicParsing="false" onAction="#NodeButton" text="Nodes" />
-      <Button layoutX="85.0" layoutY="359.0" mnemonicParsing="false" onAction="#EdgeButton" text="Edges" />
+      <Button id="nodebtn" fx:id="place_node_button" alignment="CENTER" layoutX="32.0" layoutY="964.0" mnemonicParsing="false" onAction="#NodeButton" prefHeight="66.0" prefWidth="161.0" text="NODES" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="32.0">
+         <font>
+            <Font size="20.0" />
+         </font></Button>
+      <Button id="edgebtn" fx:id="place_edge_button" layoutX="213.0" layoutY="964.0" mnemonicParsing="false" onAction="#EdgeButton" prefHeight="66.0" prefWidth="161.0" text="EDGES" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="213.0">
+         <font>
+            <Font size="20.0" />
+         </font></Button>
+      <TextField fx:id="text_field_node" layoutX="32.0" layoutY="914.0" promptText="Enter node name" AnchorPane.bottomAnchor="139.0" AnchorPane.leftAnchor="32.0" />
       <Pane id="Pane" fx:id="editpane" layoutX="9.0" layoutY="9.0" prefHeight="179.0" prefWidth="204.0" style="-fx-background-color: #CECECE;" visible="false">
          <children>
             <TextField layoutX="4.0" layoutY="8.0" prefHeight="27.0" prefWidth="188.0" text="set name..." />
@@ -23,7 +31,11 @@
             <Cursor fx:constant="DEFAULT" />
          </cursor>
       </Pane>
-      <Button layoutX="165.0" layoutY="359.0" mnemonicParsing="false" onAction="#OutputClick" text="OUTPUT" />
+      <Button id="outputbtn" fx:id="output_button" layoutX="393.0" layoutY="964.0" mnemonicParsing="false" onAction="#OutputClick" prefHeight="66.0" prefWidth="124.0" text="OUTPUT" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="393.0">
+         <font>
+            <Font size="20.0" />
+         </font></Button>
+      <TextField fx:id="text_field_edge" layoutX="213.0" layoutY="914.0" promptText="Enter relationship" AnchorPane.bottomAnchor="139.0" AnchorPane.leftAnchor="213.0" />
    </children>
    <cursor>
       <Cursor fx:constant="CROSSHAIR" />

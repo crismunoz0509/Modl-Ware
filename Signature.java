@@ -2,8 +2,6 @@ package javafxtesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
 
 public class Signature 

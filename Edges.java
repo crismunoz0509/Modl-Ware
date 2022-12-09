@@ -1,5 +1,6 @@
 package javafxtesting;
 
+import javafx.scene.Cursor;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -10,6 +11,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import static javafxtesting.GraphItem.GetBackground;
+import static javafxtesting.GraphItem.NodeToolOff;
+import static javafxtesting.GraphItem.NodeToolOn;
 
 public class Edges extends GraphItem
 {
@@ -84,6 +88,11 @@ public class Edges extends GraphItem
    public String GetRelationName()
    {
       return relation_name;
+   }
+   
+   public void RemoveEdge()
+   {
+      GetBackground().getChildren().remove(edge_group);
    }
    
    public double[] AdjustPosition(double pos[])
@@ -163,8 +172,9 @@ public class Edges extends GraphItem
       AnchorPane edit_menu = new AnchorPane();
       TextField text_field = new TextField();
       Button confirm = new Button("Confirm");
+      Button delete = new Button("Delete");
       
-      edit_menu.setStyle("-fx-background-color: #CECECE;");
+      edit_menu.setStyle("-fx-background-color: #CECECE; -fx-border-color: black; -fx-border-width: 1px;");
       
       text_field.setText(relation_name);
       
@@ -175,14 +185,31 @@ public class Edges extends GraphItem
          background.getChildren().remove(edit_menu);
       });
       
+      delete.setOnAction(eh -> {
+         GetBackground().getChildren().remove(edge_group);
+         node_down.GetEdgeList().remove(this);
+         node_end.GetEdgeList().remove(this);
+
+         open_menu = false;
+         GetBackground().getChildren().remove(edit_menu);
+      });
+      
       edge_self.setStroke(Color.GREY);
+      
+      edit_menu.setPrefWidth(210);
+      edit_menu.setPrefHeight(80);
+      edit_menu.setLayoutX(event.getX());
+      edit_menu.setLayoutY(event.getY());
       
       AnchorPane.setTopAnchor(text_field, 10.0);
       AnchorPane.setLeftAnchor(text_field, 10.0);
-      AnchorPane.setRightAnchor(text_field, 100.0);
-      AnchorPane.setBottomAnchor(text_field, 10.0);
-      AnchorPane.setTopAnchor(confirm, 10.0);
-      AnchorPane.setRightAnchor(confirm, 10.0);
+      AnchorPane.setRightAnchor(text_field, 10.0);
+      
+      AnchorPane.setLeftAnchor(confirm, 10.0);
+      AnchorPane.setBottomAnchor(confirm, 10.0);
+      
+      AnchorPane.setRightAnchor(delete, 10.0);
+      AnchorPane.setBottomAnchor(delete, 10.0);
       
       edit_menu.setOnMousePressed(events -> {
          SetStartX(events.getSceneX() - edit_menu.getTranslateX());
@@ -194,8 +221,8 @@ public class Edges extends GraphItem
          edit_menu.setTranslateY(events.getSceneY() - GetStartY());
       });
       
-      edit_menu.getChildren().addAll(confirm, text_field);
-      background.getChildren().add(edit_menu);
+      edit_menu.getChildren().addAll(confirm, text_field, delete);
+      GetBackground().getChildren().add(edit_menu);
    }
    
    public static void EdgeButtonOn()

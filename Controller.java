@@ -1,23 +1,28 @@
 package javafxtesting;
 
 import javafx.fxml.FXML;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-
+import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
-import java.io.File;
-import java.io.PrintWriter;
 import java.io.FileNotFoundException;
-
+import java.io.PrintWriter;
+import java.io.File;
 
 public class Controller extends GraphItem
 {   
    @FXML
    private AnchorPane background;
+   
+   @FXML
+   private TextField text_field_node;
+   
+   @FXML
+   private TextField text_field_edge;
    
    private Set<Signature> all_sigs = new HashSet<>();
    private HashMap<String, Integer> sig_count = new HashMap<>();
@@ -27,7 +32,7 @@ public class Controller extends GraphItem
    {
       if(GraphItem.GetNodeButton() && GraphItem.GetNodeTool())
       {
-         Nodes new_node = new Nodes("random_name", event);
+         new Nodes(text_field_node.getText(), event);
       }
    }
    
@@ -41,6 +46,7 @@ public class Controller extends GraphItem
    {
       SetBackground(background);
       GraphItem.EdgeButtonOn();
+      Nodes.TextField(text_field_edge);
    }
    
    public void OutputClick() throws FileNotFoundException
@@ -90,6 +96,7 @@ public class Controller extends GraphItem
          
          it.CheckRelationType();
          
+         //POPUP LONE?? SIG
          full_output = full_output.concat(String.format("sig %s\n{\n", it.GetName()));
          full_output = full_output.concat(it.GetRelationshipPrint());
          full_output = full_output.concat("}\n\n");
