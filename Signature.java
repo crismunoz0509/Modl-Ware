@@ -1,5 +1,7 @@
 package javafxtesting;
 
+import javafx.scene.paint.Color;
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +9,7 @@ import java.util.Map;
 public class Signature 
 {
    private String signature_name;
+   private Color node_color;
    
    private ArrayList<Nodes> all_nodes = new ArrayList<>();
    private HashMap<String, String> output_relationships = new HashMap<>();
@@ -17,8 +20,11 @@ public class Signature
    
    public Signature(String name, ArrayList<Nodes> list_of_nodes)
    {
+      Random random = new Random();
+      String colors[] = {"aquamarine", "azure", "cadetblue", "darkgrey", "darksalmon", "darkturquoise", "gold", "lightpink", "firebrick", "LavenderBlush", "Azure", "brown", "peru", "maroon", "rosybrown", "tan", "cornsilk", "deepskyblue", "lightblue", "lightsteelblue", "lightcyan", "olivedrab", "seagreen", "forestgreen", "yellowgreen", "lightgreen", "mediumslateblue", "orchid", "thisle", "lavender", "khaki", "papayawhip", "lightyellow", "peachpuff", "orange", "tomato", "darkorange", "pink", "palevioletred", "salmon", "lightsalmon", "indianred"}; 
       signature_name = name;
       all_nodes = list_of_nodes;
+      node_color = Color.valueOf(colors[random.nextInt(colors.length)]);
    }
    
    public String GetName()
@@ -26,6 +32,7 @@ public class Signature
       return signature_name;
    }
    
+   // returns all the relationships of this signature
    public String GetRelationshipPrint()
    {
       String output_print = "";
@@ -41,23 +48,39 @@ public class Signature
       return output_print;
    }
    
+   // return all the nodes a relationship connects to
+   public ArrayList<String> GetAllNodeEnds(HashMap<String, ArrayList<Boolean>> value)
+   {
+      ArrayList<String> temp_list = new ArrayList<>();
+      for(Map.Entry map_it : value.entrySet())
+      {
+         temp_list.add((String)map_it.getKey());
+      }
+      
+      return temp_list;
+   }
+   
+   //fill output_relationships with relationship types
    public void CheckRelationType()
    {
       StoreRelationShips();
-      for(Nodes it : all_nodes)
+      for(Nodes current_node : all_nodes)
       {
-         String node_name = it.GetNodeName();
-         HashMap<String, HashMap<String, Integer>> counts_hash = CountRelationships(it);
-         //SOME, LONE
-         //true, false SOME
-         //false, true LONE
-         //false, false ONE
-         //true, true SET
+         current_node.GetRectangle().setFill(node_color);
+         
+         String node_name = current_node.GetNodeName();
+         HashMap<String, HashMap<String, Integer>> counts_hash = CountRelationships(current_node);
+         
+         // < false, false > default
+         
+         // for each relationship
+         // "flip the switches" for each individual node, depending on the node's relationship count
+         // < relationship name < node name, < false, false >>>
          for(Map.Entry map_relations : relation_type.entrySet())
          {
             String key = (String)map_relations.getKey();
             HashMap<String, ArrayList<Boolean>> value = (HashMap<String, ArrayList<Boolean>>)map_relations.getValue();
-            
+           
             for(Map.Entry map_end_points : value.entrySet())
             {
                String key_end = (String)map_end_points.getKey();
@@ -91,6 +114,18 @@ public class Signature
          }
       }
       
+      // go through the "flipped switches" and determine if the entire relationship is of
+      // one, lone, some, or set type
+      // < true, false > SOME
+      // < false, true > LONE
+      // < false, false > ONE
+      // < true, true > SET
+      
+      // check if the relationship is disjoint
+      
+      // Then creating a string with the relationship type (disj, some, lone etc) as well as 
+      // what signatures it's related to
+      // finally storing that string in output_relationships
       for(Map.Entry map_relations : relation_type.entrySet())
       {
          String key = (String)map_relations.getKey();
@@ -102,7 +137,6 @@ public class Signature
          store_relation_type.add(false);
          store_relation_type.add(false);
          
-         // DISJ    ONE/LONE/SET/SOME   ( sig1 + sig2 + sig3 + sig4 )
          String output = "";
          output_relationships.put(key, output);
          
@@ -161,8 +195,11 @@ public class Signature
       }
    }
    
+   // go through all nodes to store all possible relationships a signature can have or what nodes it can connect to
    public void StoreRelationShips()
    {      
+      // fill relation_type with starting values for every relation and 
+      // < relation name, < node name , < false, false >>>
       for(Nodes it : all_nodes)
       {
          for(Edges selected_edge : it.GetEdgeList())
@@ -194,9 +231,13 @@ public class Signature
       }
    }
    
+   // for each node in a certain relationship, count the # of times that node repeats
    public HashMap<String, HashMap<String, Integer>> CountRelationships(Nodes current_node)
    {
       HashMap<String, HashMap<String, Integer>> counts_hash = new HashMap<>();
+      
+      // for each relationship, count the # of relationships which correspond with a specific node
+      // < relation name , < node name , # of nodes> >
       for(Edges selected_edge : current_node.GetEdgeList())
       {
          String relation_name = selected_edge.GetRelationName();
@@ -222,10 +263,10 @@ public class Signature
             counts_hash.put(relation_name, temp_hash);
          }
       }
-      
       return counts_hash;
    }
    
+   // determine if a relationship is disjoint
    public void CheckDisjoint()
    {
       for(Nodes all_it : all_nodes)
@@ -255,16 +296,5 @@ public class Signature
             }
          }
       }
-   }
-   
-   public ArrayList<String> GetAllNodeEnds(HashMap<String, ArrayList<Boolean>> value)
-   {
-      ArrayList<String> temp_list = new ArrayList<>();
-      for(Map.Entry map_it : value.entrySet())
-      {
-         temp_list.add((String)map_it.getKey());
-      }
-      
-      return temp_list;
    }
 }

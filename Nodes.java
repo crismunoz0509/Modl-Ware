@@ -1,6 +1,5 @@
 package javafxtesting;
 
-import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.Font;
@@ -14,62 +13,57 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Nodes extends GraphItem
 {   
-   private final int NODEWIDTH = 75;
-   private final int NODEHEIGHT = 75;
+   // determine the size of the node + text distance from edge
+   private final int NODEWIDTH = 100;
+   private final int NODEHEIGHT = 100;
    private final int TEXTPADDINGHORIZONTAL = 5;
+   private final double STROKEWIDTH = 4;
+   private final Color DEFAULTFILL = Color.WHITE;
+   private final Color BORDERCOLOR = Color.BLACK;
+   private final Color EDITBORDERCOLOR = Color.GAINSBORO;
+   
    
    private String node_name;
-   private Group node_group = new Group();
-   private Text node_display_text;
-   private Rectangle node_display_shape;
+   private Group javafx_node_group = new Group();
+   private Text javafx_node_display_text;
+   private Rectangle javafx_node_display_shape;
    private ArrayList<Edges> edge_list = new ArrayList<>();
    private ArrayList<Edges> edge_list_connected_to = new ArrayList<>();
    private ArrayList<Nodes> relationships = new ArrayList<>();
    
-   private static double down_points[] = new double[4];
-   private static boolean open_menu = false;
-   private static boolean node_hover = false;
+   private static double x_y_positions[] = new double[4];
+   private static boolean is_edit_menu_open = false;
+   private static boolean is_mouse_hovering_node = false;
    
-   private static Nodes selected_node;
    private static Nodes node_down;
    private static Nodes node_end;
-   private static TextField text_field; 
+   private static TextField javafx_text_field; 
    private static ArrayList<Nodes> all_nodes = new ArrayList<>();
    
    public Nodes(String node_name, MouseEvent event)
    {
       this.node_name = node_name;
-      AddNodeToList(this);
+      all_nodes.add(this);
       
-      node_display_shape = new Rectangle(event.getSceneX() - (NODEWIDTH / 2), event.getSceneY() - (NODEHEIGHT / 2), NODEWIDTH, NODEHEIGHT);
+      javafx_node_display_shape = new Rectangle(event.getSceneX() - (NODEWIDTH / 2), event.getSceneY() - (NODEHEIGHT / 2), NODEWIDTH, NODEHEIGHT);
       
-      node_display_text = new Text(node_display_shape.getX() + TEXTPADDINGHORIZONTAL, node_display_shape.getY() + (NODEHEIGHT / 2), node_name);
-      node_display_text.setWrappingWidth(NODEWIDTH - TEXTPADDINGHORIZONTAL);
-      node_display_text.setFont(Font.font("Times New Roman", 20));
+      javafx_node_display_text = new Text(javafx_node_display_shape.getX() + TEXTPADDINGHORIZONTAL, javafx_node_display_shape.getY() + (NODEHEIGHT / 2), node_name);
+      javafx_node_display_text.setWrappingWidth(NODEWIDTH - TEXTPADDINGHORIZONTAL);
+      javafx_node_display_text.setFont(Font.font("Times New Roman", 20));
       
-      node_display_shape.setFill(Color.ORANGE);
-      node_display_shape.setStroke(Color.BLACK);
-      node_display_shape.setStrokeWidth(3.0);
+      javafx_node_display_shape.setFill(DEFAULTFILL);
+      javafx_node_display_shape.setStroke(BORDERCOLOR);
+      javafx_node_display_shape.setStrokeWidth(STROKEWIDTH);
       
-      node_group.getChildren().add(node_display_shape);
-      node_group.getChildren().add(node_display_text);
+      javafx_node_group.getChildren().add(javafx_node_display_shape);
+      javafx_node_group.getChildren().add(javafx_node_display_text);
       
-      GetBackground().getChildren().add(node_group);
-      NodeFunctions(node_group);
-   }
-   
-   public static void TextField(TextField field)
-   {
-      text_field = field;
-   }
-   
-   public Nodes GetSelectedNode()
-   {
-      return selected_node;
+      // add text and shape to background
+      GetBackground().getChildren().add(javafx_node_group);
+      ApplyNodeFunctions(javafx_node_group);
    }
    
    public String GetNodeName()
@@ -87,9 +81,14 @@ public class Nodes extends GraphItem
       return NODEWIDTH;
    }
    
-   public static ArrayList<Nodes> GetAllNodes()
+   public static ArrayList<Nodes> GetAllNodesArrayList()
    {
       return all_nodes;
+   }
+   
+   public Rectangle GetRectangle()
+   {
+      return javafx_node_display_shape;
    }
    
    public ArrayList<Edges> GetEdgeList()
@@ -97,19 +96,24 @@ public class Nodes extends GraphItem
       return edge_list;
    }
    
-   public void NodeHoverOn()
-   {
-      node_hover = true;
-   }
-   
-   public void NodeHoverOff()
-   {
-      node_hover = false;
-   }
-   
    public boolean GetNodeHover()
    {
-      return node_hover;
+      return is_mouse_hovering_node;
+   }
+   
+   public void SetNodeHoverOn()
+   {
+      is_mouse_hovering_node = true;
+   }
+   
+   public void SetNodeHoverOff()
+   {
+      is_mouse_hovering_node = false;
+   }
+   
+   public static void SetTextField(TextField field)
+   {
+      javafx_text_field = field;
    }
    
    public void AddNodeToList(Nodes new_node)
@@ -117,32 +121,26 @@ public class Nodes extends GraphItem
       all_nodes.add(new_node);
    }
    
-   public HashMap<String, Integer> ReturnEmptyRelationShipCounts()
-   {
-      HashMap<String, Integer> empty_count = new HashMap<>();
-      
-      
-      
-      return empty_count;
-   }
-   
    public void AddEdge(MouseEvent event, Nodes node)
    {
-      if(Edges.GetEdgeTool())
+      //on the second click of a node, connect both nodes with an edge
+      if(GetEdgeTool())
       {
          if(node_down == null)
          {
             node_down = node;
-            down_points[0] = node.node_display_shape.getX() + (node.node_display_shape.getWidth() / 2);
-            down_points[1] = node.node_display_shape.getY() + (node.node_display_shape.getHeight() / 2);
+            node_down.GetRectangle().setStroke(EDITBORDERCOLOR);
+            x_y_positions[0] = node.javafx_node_display_shape.getX() + (node.javafx_node_display_shape.getWidth() / 2);
+            x_y_positions[1] = node.javafx_node_display_shape.getY() + (node.javafx_node_display_shape.getHeight() / 2);
          }
          else
          {
             node_end = node;
-            down_points[2] = node.node_display_shape.getX() + (node.node_display_shape.getWidth() / 2);
-            down_points[3] = node.node_display_shape.getY() + (node.node_display_shape.getHeight() / 2);
-            Edges edge = new Edges(text_field.getText(), down_points, node_down, node_end, GetBackground());
+            x_y_positions[2] = node.javafx_node_display_shape.getX() + (node.javafx_node_display_shape.getWidth() / 2);
+            x_y_positions[3] = node.javafx_node_display_shape.getY() + (node.javafx_node_display_shape.getHeight() / 2);
+            Edges edge = new Edges(javafx_text_field.getText(), x_y_positions, node_down, node_end, GetBackground());
             
+            node_down.GetRectangle().setStroke(BORDERCOLOR);
             node_down.relationships.add(node_end);
             node_down.edge_list.add(edge);
             node_end.edge_list_connected_to.add(edge);
@@ -155,39 +153,39 @@ public class Nodes extends GraphItem
       }
    }
    
-   public void NodeFunctions(Node node)
+   public void ApplyNodeFunctions(Node javafx_node)
    {
-      node.setOnMouseEntered(events -> {
+      javafx_node.setOnMouseEntered(events -> {
          if(GetNodeButton())
          {
-            NodeHoverOn();
-            NodeToolOff();
+            SetNodeHoverOn();
+            SetNodeToolOff();
             GetBackground().setCursor(Cursor.DEFAULT);
          }
       });
       
-      node.setOnMouseExited(events -> {
+      javafx_node.setOnMouseExited(events -> {
          if(GetNodeButton())
          {
-            NodeHoverOff();
-            NodeToolOn();
+            SetNodeHoverOff();
+            SetNodeToolOn();
             GetBackground().setCursor(Cursor.CROSSHAIR);
          }
       });
       
-      node.setOnMouseClicked(events -> {
-         if(Edges.GetEdgeTool())
+      javafx_node.setOnMouseClicked(events -> {
+         if(GetEdgeTool())
          {
             AddEdge(events, this);
          }
          
          if(GetNodeButton())
          {
-            if(GetNodeHover() && !open_menu)
+            if(GetNodeHover() && !is_edit_menu_open)
             {
-               NodeToolOff();
+               SetNodeToolOff();
                EditNode(events);
-               open_menu = true;
+               is_edit_menu_open = true;
             }
          }
       });
@@ -195,81 +193,72 @@ public class Nodes extends GraphItem
    
    public void EditNode(MouseEvent event)
    {      
-      AnchorPane edit_menu = new AnchorPane();
-      TextField text_field = new TextField();
-      Button confirm = new Button("Confirm");
-      Button delete = new Button("Delete");
+      // create edit menu + edit menu contents
+      AnchorPane javafx_edit_menu_background = new AnchorPane();
+      TextField javafx_text_field_edit = new TextField();
+      Button javafx_confirm_button = new Button("Confirm");
+      Button javafx_delete_button = new Button("Delete");
       
-      edit_menu.setStyle("-fx-background-color: #CECECE; -fx-border-color: black; -fx-border-width: 1px;");
+      javafx_edit_menu_background.setStyle("-fx-background-color: #CECECE; -fx-border-color: black; -fx-border-width: 1px;");
+      javafx_text_field_edit.setText(node_name);
       
-      text_field.setText(node_name);
+      javafx_node_display_shape.setStroke(EDITBORDERCOLOR);
       
-      confirm.setOnAction(eh -> {
-         node_display_text.setText(text_field.getText());
-         node_name = text_field.getText();
-         node_display_shape.setStroke(Color.BLACK);
-         GetBackground().getChildren().remove(edit_menu);
-         open_menu = false;
+      javafx_edit_menu_background.setPrefWidth(210);
+      javafx_edit_menu_background.setPrefHeight(80);
+      javafx_edit_menu_background.setLayoutX(event.getX());
+      javafx_edit_menu_background.setLayoutY(event.getY());
+      
+      // set positions of the edit menu contents within the background
+      AnchorPane.setTopAnchor(javafx_text_field_edit, 10.0);
+      AnchorPane.setLeftAnchor(javafx_text_field_edit, 10.0);
+      AnchorPane.setRightAnchor(javafx_text_field_edit, 10.0);
+      
+      AnchorPane.setLeftAnchor(javafx_confirm_button, 10.0);
+      AnchorPane.setBottomAnchor(javafx_confirm_button, 10.0);
+      
+      AnchorPane.setRightAnchor(javafx_delete_button, 10.0);
+      AnchorPane.setBottomAnchor(javafx_delete_button, 10.0);
+      
+      // add all the edit menu contents to the background 
+      javafx_edit_menu_background.getChildren().addAll(javafx_confirm_button, javafx_text_field_edit, javafx_delete_button);
+      GetBackground().getChildren().add(javafx_edit_menu_background);
+      
+      // when the confirm button clicked, update the node text, name, and change stroke color back to black
+      javafx_confirm_button.setOnAction(eh -> {
+         javafx_node_display_text.setText(javafx_text_field_edit.getText());
+         node_name = javafx_text_field_edit.getText();
+         javafx_node_display_shape.setStroke(BORDERCOLOR);
+         GetBackground().getChildren().remove(javafx_edit_menu_background);
+         is_edit_menu_open = false;
       });
       
-      delete.setOnAction(eh -> {
-         GetBackground().getChildren().remove(node_group);
+      // when the delete button clicked, remove from the background, remove from the static node list, 
+      // and delete the edges its connected to + edges are connected to it
+      javafx_delete_button.setOnAction(eh -> {
+         GetBackground().getChildren().remove(javafx_node_group);
          System.out.println(all_nodes.size());
          all_nodes.remove(this);
          System.out.println(all_nodes.size());
          for(Edges edge_it : edge_list)
          {
-            edge_it.RemoveEdge();
+            edge_it.RemoveJavafxEdge();
          }
          for(Edges edge_it : edge_list_connected_to)
          {
-            edge_it.RemoveEdge();
+            edge_it.RemoveJavafxEdge();
             edge_it.GetNodeDown().GetEdgeList().remove(edge_it);
          }
-         open_menu = false;
-         GetBackground().getChildren().remove(edit_menu);
+         is_edit_menu_open = false;
+         GetBackground().getChildren().remove(javafx_edit_menu_background);
       });
       
-      node_display_shape.setStroke(Color.GREY);
-      
-      edit_menu.setPrefWidth(210);
-      edit_menu.setPrefHeight(80);
-      edit_menu.setLayoutX(event.getX());
-      edit_menu.setLayoutY(event.getY());
-      
-      AnchorPane.setTopAnchor(text_field, 10.0);
-      AnchorPane.setLeftAnchor(text_field, 10.0);
-      AnchorPane.setRightAnchor(text_field, 10.0);
-      
-      AnchorPane.setLeftAnchor(confirm, 10.0);
-      AnchorPane.setBottomAnchor(confirm, 10.0);
-      
-      AnchorPane.setRightAnchor(delete, 10.0);
-      AnchorPane.setBottomAnchor(delete, 10.0);
-      
-      edit_menu.setOnMousePressed(events -> {
-         SetStartX(events.getSceneX() - edit_menu.getTranslateX());
-         SetStartY(events.getSceneY() - edit_menu.getTranslateY());
+      javafx_edit_menu_background.setOnMouseEntered(events -> {
+         SetNodeToolOff();
       });
       
-      edit_menu.setOnMouseDragged(events ->{
-         edit_menu.setTranslateX(events.getSceneX() - GetStartX());
-         edit_menu.setTranslateY(events.getSceneY() - GetStartY());
+      javafx_edit_menu_background.setOnMouseExited(events -> {
+         SetNodeToolOn();
       });
-      
-      edit_menu.setOnMouseEntered(eh -> {
-         NodeHoverOff();
-         NodeToolOff();
-         GetBackground().setCursor(Cursor.DEFAULT);
-      });
-      
-      edit_menu.setOnMouseExited(eh -> {
-         NodeHoverOn();
-         NodeToolOn();
-         GetBackground().setCursor(Cursor.CROSSHAIR);
-      });
-      
-      edit_menu.getChildren().addAll(confirm, text_field, delete);
-      GetBackground().getChildren().add(edit_menu);
    }
 }

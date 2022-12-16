@@ -9,17 +9,26 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" fx:id="background" onMouseClicked="#CanvasClick" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtesting.Controller">
+<AnchorPane id="AnchorPane" fx:id="javafx_background" onMouseClicked="#PlaceNodeOnClick" prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #FAF9F6;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxtesting.Controller">
    <children>
-      <Button id="nodebtn" fx:id="place_node_button" alignment="CENTER" layoutX="32.0" layoutY="964.0" mnemonicParsing="false" onAction="#NodeButton" prefHeight="66.0" prefWidth="161.0" text="NODES" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="32.0">
+      <Button id="nodebtn" fx:id="place_node_button" alignment="CENTER" layoutX="32.0" layoutY="964.0" mnemonicParsing="false" onAction="#NodeButtonPressed" prefHeight="66.0" prefWidth="161.0" style="-fx-border-radius: 50; -fx-background-color: #44c767; -fx-border-style: solid; -fx-background-radius: 50;" text="NODES" textFill="WHITE" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="32.0">
          <font>
-            <Font size="20.0" />
-         </font></Button>
-      <Button id="edgebtn" fx:id="place_edge_button" layoutX="213.0" layoutY="964.0" mnemonicParsing="false" onAction="#EdgeButton" prefHeight="66.0" prefWidth="161.0" text="EDGES" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="213.0">
+            <Font name="System Bold" size="25.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></Button>
+      <Button id="edgebtn" fx:id="place_edge_button" layoutX="213.0" layoutY="964.0" mnemonicParsing="false" onAction="#EdgeButtonPressed" prefHeight="66.0" prefWidth="161.0" style="-fx-border-radius: 50; -fx-background-radius: 50; -fx-background-color: #44c767; -fx-border-style: solid;" text="EDGES" textFill="WHITE" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="213.0">
          <font>
-            <Font size="20.0" />
-         </font></Button>
-      <TextField fx:id="text_field_node" layoutX="32.0" layoutY="914.0" promptText="Enter node name" AnchorPane.bottomAnchor="139.0" AnchorPane.leftAnchor="32.0" />
+            <Font name="System Bold" size="25.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></Button>
+      <TextField fx:id="text_field_node" layoutX="32.0" layoutY="914.0" prefHeight="36.0" prefWidth="161.0" promptText="Enter node name" AnchorPane.bottomAnchor="139.0" AnchorPane.leftAnchor="32.0">
+         <font>
+            <Font size="14.0" />
+         </font></TextField>
       <Pane id="Pane" fx:id="editpane" layoutX="9.0" layoutY="9.0" prefHeight="179.0" prefWidth="204.0" style="-fx-background-color: #CECECE;" visible="false">
          <children>
             <TextField layoutX="4.0" layoutY="8.0" prefHeight="27.0" prefWidth="188.0" text="set name..." />
@@ -31,11 +40,17 @@
             <Cursor fx:constant="DEFAULT" />
          </cursor>
       </Pane>
-      <Button id="outputbtn" fx:id="output_button" layoutX="393.0" layoutY="964.0" mnemonicParsing="false" onAction="#OutputClick" prefHeight="66.0" prefWidth="124.0" text="OUTPUT" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="393.0">
+      <Button id="outputbtn" fx:id="output_button" layoutX="393.0" layoutY="964.0" mnemonicParsing="false" onAction="#OutputButtonPressed" prefHeight="66.0" prefWidth="124.0" style="-fx-background-color: #44c767; -fx-border-radius: 50; -fx-background-radius: 50; -fx-border-style: solid;" text="OUTPUT" textFill="WHITE" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="393.0">
          <font>
-            <Font size="20.0" />
-         </font></Button>
-      <TextField fx:id="text_field_edge" layoutX="213.0" layoutY="914.0" promptText="Enter relationship" AnchorPane.bottomAnchor="139.0" AnchorPane.leftAnchor="213.0" />
+            <Font name="System Bold" size="22.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></Button>
+      <TextField fx:id="text_field_edge" layoutX="213.0" layoutY="914.0" prefHeight="37.0" prefWidth="161.0" promptText="Enter relationship" AnchorPane.bottomAnchor="139.0" AnchorPane.leftAnchor="213.0">
+         <font>
+            <Font size="14.0" />
+         </font></TextField>
    </children>
    <cursor>
       <Cursor fx:constant="CROSSHAIR" />

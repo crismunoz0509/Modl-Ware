@@ -1,6 +1,5 @@
 package javafxtesting;
 
-import javafx.scene.Cursor;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -12,62 +11,79 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import static javafxtesting.GraphItem.GetBackground;
-import static javafxtesting.GraphItem.NodeToolOff;
-import static javafxtesting.GraphItem.NodeToolOn;
 
 public class Edges extends GraphItem
 {
-   private boolean down_point_connection;
-   private boolean open_menu;
+   private boolean is_menu_open;
    
-   private String relation_name = null;
-   private Nodes node_down;
+   private final double ENDPOINTRADIUS = 5;
+   private final double LINEWIDTH = 2;
+   private final double LINEWIDTHEDITSIZE = 6;
+   private final Color LINECOLOR = Color.BLACK;
+   private final Color LINEEDITCOLOR = Color.GAINSBORO;
+           
+   private String relation_name;
+   private Nodes node_start;
    private Nodes node_end;
-   private Group edge_group = new Group();
-   private Text edge_text;
-   private Line edge_self;
+   private Group javafx_edge_group = new Group();
+   private Text javafx_edge_text;
+   private Line javafx_edge;
    
-   private static int edge_count = 0;
-   
-   public Edges(String relation, double pos_arr[], Nodes node_down, Nodes node_end, AnchorPane background)
+   public Edges(String relation_name, double position_array[], Nodes node_start, Nodes node_end, AnchorPane javafx_background)
    {
-      this.relation_name = relation;
-      this.node_down = node_down;
+      this.relation_name = relation_name;
+      this.node_start = node_start;
       this.node_end = node_end;
       
-      double adjusted[] = AdjustPosition(pos_arr);
-      Line new_edge = new Line(adjusted[0], adjusted[1], adjusted[2], adjusted[3]);
-      new_edge.toBack();
-      Circle new_circle = new Circle(adjusted[2], adjusted[3], 5);
+      double x_start_position, y_start_position, x_end_position, y_end_position;
+      double x_edge_middle_position, y_edge_middle_position;
+      double adjusted_position_array[] = null;
+      Line javafx_edge = null;
+      Text javafx_edge_text = null;
       
-      double copy[] = GetMiddlePosition(adjusted.clone());
-      Text edge_text = new Text(copy[0], copy[1], relation);
-      edge_text.setFont(Font.font("Times New Roman", 20));
+      // adjust position array values so lines touch the "edges" of a node and not the node center
+      adjusted_position_array= AdjustPositionArray(position_array);
+      x_start_position = adjusted_position_array[0];
+      y_start_position = adjusted_position_array[1];
+      x_end_position = adjusted_position_array[2];
+      y_end_position = adjusted_position_array[3];
       
-      new_edge.setStrokeWidth(5.0);
-      new_edge.setStroke(Color.BLACK);
-      edge_self = new_edge;
-      this.edge_text = edge_text;
+      // create and draw line 
+      javafx_edge = new Line(x_start_position, y_start_position, x_end_position, y_end_position);
       
-      edge_group.getChildren().addAll(new_edge, edge_text, new_circle);
-      edge_group.setOnMouseClicked(eh -> {
-         EditEdge(eh, background);
+      // move edge z position back
+      javafx_edge.toBack();
+      
+      // create and draw circle
+      Circle javafx_circle = new Circle(x_end_position, y_end_position, ENDPOINTRADIUS);
+      
+      double edge_middle_position_array[] = GetArrayMiddlePosition(adjusted_position_array.clone());
+      
+      x_edge_middle_position = edge_middle_position_array[0];
+      y_edge_middle_position = edge_middle_position_array[1];
+      javafx_edge_text = new Text(x_edge_middle_position, y_edge_middle_position, relation_name);
+      javafx_edge_text.setFont(Font.font("Times New Roman", 20));
+      javafx_edge.setStrokeWidth(LINEWIDTH);
+      javafx_edge.setStroke(LINECOLOR);
+      
+      // add objects to group and display group on the background to make them visible to user
+      javafx_edge_group.getChildren().addAll(javafx_edge, javafx_edge_text, javafx_circle);
+      javafx_edge_group.setOnMouseClicked(event_handler -> {
+         EditEdgeFunction(event_handler, javafx_background);
       });
+      
+      this.javafx_edge = javafx_edge;
+      this.javafx_edge_text = javafx_edge_text;
    }
    
    public Group GetEdgeGroup()
    {
-      return edge_group;
-   }
-   
-   public boolean GetDownPointConnection()
-   {
-      return down_point_connection;
+      return javafx_edge_group;
    }
    
    public Nodes GetNodeDown()
    {
-      return node_down;
+      return node_start;
    }
    
    public Nodes GetNodeEnd()
@@ -75,68 +91,116 @@ public class Edges extends GraphItem
       return node_end;
    }
    
-   public int GetEdgeCount()
-   {
-      return edge_count;
-   }
-   
-   public Line GetEdge()
-   {
-      return edge_self;
-   }
-   
    public String GetRelationName()
    {
       return relation_name;
    }
    
-   public void RemoveEdge()
+   public void RemoveJavafxEdge()
    {
-      GetBackground().getChildren().remove(edge_group);
+      GetBackground().getChildren().remove(javafx_edge_group);
    }
    
-   public double[] AdjustPosition(double pos[])
+   public double[] AdjustPositionArray(double pos[])
    {
       double startx = pos[0], endx = pos[2], starty = pos[1], endy = pos[3];
       double output_position[] = new double[4];
       
-      output_position[0] = startx;
-      output_position[1] = starty;
+      double top_start_y = starty - (node_end.GetNodeHeight() / 2);
+      double bottom_start_y = starty + (node_end.GetNodeHeight() / 2);
+      double right_start_x = startx + (node_end.GetNodeWidth() / 2);
+      double left_start_x = startx - (node_end.GetNodeWidth() / 2);
       
-      if(startx <= (endx - node_end.GetNodeWidth()))
+      
+      if( ( bottom_start_y < endy ))
       {
-         output_position[2] = endx - (node_end.GetNodeWidth() / 2);
-         output_position[0] = startx + (node_end.GetNodeWidth() / 2);
+         if(right_start_x < endx)
+         {
+            if((Math.sin(45) * (endx - right_start_x)) + bottom_start_y < endy)
+            {
+               output_position[0] = startx;
+               output_position[1] = bottom_start_y;
+            }
+            else
+            {
+               output_position[0] = right_start_x;
+               output_position[1] = starty;
+            }
+         }
+         else if(left_start_x > endx)
+         {
+            if((Math.sin(45) * (left_start_x - endx)) + bottom_start_y < endy)
+            {
+               output_position[0] = startx;
+               output_position[1] = bottom_start_y;
+            }
+            else
+            {
+               output_position[0] = left_start_x;
+               output_position[1] = starty;
+            }
+         }
+         else
+         {
+            output_position[0] = startx;
+            output_position[1] = bottom_start_y;
+         }
       }
-      else if(startx >= (endx + node_end.GetNodeWidth()))
+      else if( top_start_y > endy)
       {
-         output_position[2] = endx + (node_end.GetNodeWidth() / 2);
-         output_position[0] = startx - (node_end.GetNodeWidth() / 2);
+         if(right_start_x < endx)
+         {
+            if(top_start_y - (Math.sin(45) * (endx - right_start_x)) > endy)
+            {
+               output_position[0] = startx;
+               output_position[1] = top_start_y;
+            }
+            else
+            {
+               output_position[0] = right_start_x;
+               output_position[1] = starty;
+            }
+         }
+         else if(left_start_x > endx)
+         {
+            if(top_start_y - (Math.sin(45) * (left_start_x - endx)) >= endy)
+            {
+               output_position[0] = startx;
+               output_position[1] = top_start_y;
+            }
+            else
+            {
+               output_position[0] = left_start_x;
+               output_position[1] = starty;
+            }
+         }
+         else
+         {
+            output_position[0] = startx;
+            output_position[1] = top_start_y;
+         }
       }
       else
       {
-         output_position[2] = endx;
+         if(right_start_x < endx)
+         {
+            output_position[0] = right_start_x;
+            output_position[1] = starty;
+         }
+         else if(left_start_x > endx)
+         {
+            output_position[0] = left_start_x;
+            output_position[1] = starty;
+         }
       }
       
-      if(starty <= (endy - node_end.GetNodeHeight()))
-      {
-         output_position[3] = endy - (node_end.GetNodeHeight() / 2);
-         output_position[1] = starty + (node_end.GetNodeHeight() / 2);
-      }
-      else if(starty >= (endy + node_end.GetNodeHeight()))
-      {
-         output_position[3] = endy + (node_end.GetNodeHeight() / 2);
-         output_position[1] = starty - (node_end.GetNodeHeight() / 2);
-      }
-      else
-      {
-         output_position[3] = endy;
-      }
+      output_position[2] = endx;
+      output_position[3] = endy;
       
       return output_position;
    }
    
-   public double[] GetMiddlePosition(double pos[])
+   public double[] GetArrayMiddlePosition(double pos[])
    {
       double startx = pos[0], endx = pos[2], starty = pos[1], endy = pos[3];
       double halfwayx = 0, halfwayy = 0;
@@ -167,68 +231,59 @@ public class Edges extends GraphItem
       return output_position;
    }
    
-   public void EditEdge(MouseEvent event, AnchorPane background)
+   public void EditEdgeFunction(MouseEvent event, AnchorPane background)
    {
-      AnchorPane edit_menu = new AnchorPane();
-      TextField text_field = new TextField();
-      Button confirm = new Button("Confirm");
-      Button delete = new Button("Delete");
+      // create edit menu + edit menu contents
+      AnchorPane javafx_edit_menu_background = new AnchorPane();
+      TextField javafx_text_field = new TextField();
+      Button javafx_confirm_button = new Button("Confirm");
+      Button javafx_delete_button = new Button("Delete");
       
-      edit_menu.setStyle("-fx-background-color: #CECECE; -fx-border-color: black; -fx-border-width: 1px;");
+      javafx_edit_menu_background.setStyle("-fx-background-color: #CECECE; -fx-border-color: black; -fx-border-width: 1px;");
+      javafx_text_field.setText(relation_name);
       
-      text_field.setText(relation_name);
+      javafx_edge.setStroke(LINEEDITCOLOR);
+      javafx_edge.setStrokeWidth(LINEWIDTHEDITSIZE);
       
-      confirm.setOnAction(eh -> {
-         edge_text.setText(text_field.getText());
-         relation_name = text_field.getText();
-         edge_self.setStroke(Color.BLACK);
-         background.getChildren().remove(edit_menu);
+      javafx_edit_menu_background.setPrefWidth(210);
+      javafx_edit_menu_background.setPrefHeight(80);
+      javafx_edit_menu_background.setLayoutX(event.getX());
+      javafx_edit_menu_background.setLayoutY(event.getY());
+      
+      // set positions of the edit menu contents within the background
+      AnchorPane.setTopAnchor(javafx_text_field, 10.0);
+      AnchorPane.setLeftAnchor(javafx_text_field, 10.0);
+      AnchorPane.setRightAnchor(javafx_text_field, 10.0);
+      
+      AnchorPane.setLeftAnchor(javafx_confirm_button, 10.0);
+      AnchorPane.setBottomAnchor(javafx_confirm_button, 10.0);
+      
+      AnchorPane.setRightAnchor(javafx_delete_button, 10.0);
+      AnchorPane.setBottomAnchor(javafx_delete_button, 10.0);
+      
+      // add all the edit menu contents to the background 
+      javafx_edit_menu_background.getChildren().addAll(javafx_confirm_button, javafx_text_field, javafx_delete_button);
+      GetBackground().getChildren().add(javafx_edit_menu_background);
+      
+      // when the confirm button clicked, update the edge text, name, and change color back to black
+      javafx_confirm_button.setOnAction(event_handler -> {
+         javafx_edge_text.setText(javafx_text_field.getText());
+         relation_name = javafx_text_field.getText();
+         javafx_edge.setStroke(LINECOLOR);
+         javafx_edge.setStrokeWidth(LINEWIDTH);
+         
+         is_menu_open = false;
+         background.getChildren().remove(javafx_edit_menu_background);
       });
       
-      delete.setOnAction(eh -> {
-         GetBackground().getChildren().remove(edge_group);
-         node_down.GetEdgeList().remove(this);
+      // when the delete button clicked, delete the object from the background & remove this edge from edge lists
+      javafx_delete_button.setOnAction(event_handler -> {
+         GetBackground().getChildren().remove(javafx_edge_group);
+         node_start.GetEdgeList().remove(this);
          node_end.GetEdgeList().remove(this);
 
-         open_menu = false;
-         GetBackground().getChildren().remove(edit_menu);
+         is_menu_open = false;
+         GetBackground().getChildren().remove(javafx_edit_menu_background);
       });
-      
-      edge_self.setStroke(Color.GREY);
-      
-      edit_menu.setPrefWidth(210);
-      edit_menu.setPrefHeight(80);
-      edit_menu.setLayoutX(event.getX());
-      edit_menu.setLayoutY(event.getY());
-      
-      AnchorPane.setTopAnchor(text_field, 10.0);
-      AnchorPane.setLeftAnchor(text_field, 10.0);
-      AnchorPane.setRightAnchor(text_field, 10.0);
-      
-      AnchorPane.setLeftAnchor(confirm, 10.0);
-      AnchorPane.setBottomAnchor(confirm, 10.0);
-      
-      AnchorPane.setRightAnchor(delete, 10.0);
-      AnchorPane.setBottomAnchor(delete, 10.0);
-      
-      edit_menu.setOnMousePressed(events -> {
-         SetStartX(events.getSceneX() - edit_menu.getTranslateX());
-         SetStartY(events.getSceneY() - edit_menu.getTranslateY());
-      });
-      
-      edit_menu.setOnMouseDragged(events ->{
-         edit_menu.setTranslateX(events.getSceneX() - GetStartX());
-         edit_menu.setTranslateY(events.getSceneY() - GetStartY());
-      });
-      
-      edit_menu.getChildren().addAll(confirm, text_field, delete);
-      GetBackground().getChildren().add(edit_menu);
-   }
-   
-   public static void EdgeButtonOn()
-   {
-      Nodes.NodeButtonOff();
-      Nodes.NodeToolOff();
-      EdgeToolOn();
    }
 }

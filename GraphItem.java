@@ -16,65 +16,65 @@ class GraphItem
    private static boolean edge_button;
    private static boolean edge_tool;
    
-   public static void NodeButtonOn()
+   public static void SetNodeButtonOn()
    {
       node_button = true;
-      NodeToolOn();
-      Edges.EdgeToolOff();
+      SetNodeToolOn();
+      Edges.SetEdgeToolOff();
    }
    
-   public static void NodeButtonOff()
+   public static void SetNodeButtonOff()
    {
       node_button = false;
    }
    
-   public static void NodeToolOn()
+   public static void SetNodeToolOn()
    {
       node_tool = true;
    }
    
-   public static void NodeToolOff()
+   public static void SetNodeToolOff()
    {
       node_tool = false;
    }
    
-   public static void EdgeButtonOn()
+   public static void SetEdgeButtonOn()
    {
-      NodeButtonOff();
-      NodeToolOff();
-      EdgeToolOn();
+      SetNodeButtonOff();
+      SetNodeToolOff();
+      SetEdgeToolOn();
       edge_button = false;
    }
    
-   public static void EdgeButtonOff()
+   public static void SetEdgeButtonOff()
    {
-      EdgeToolOff();
+      SetEdgeToolOff();
       edge_button = false;
    }
    
-   public static void EdgeToolOn()
+   public static void SetEdgeToolOn()
    {
       edge_tool = true;
    }
    
-   public static void EdgeToolOff()
+   public static void SetEdgeToolOff()
    {
       edge_tool = false;
    }
    
-   public void SetStartX(double newX)
+   public void SetStartX(double new_x_position)
    {
-      translate_startX = newX;
+      translate_startX = new_x_position;
    }
    
-   public void SetStartY(double newY)
+   public void SetStartY(double new_y_position)
    {
-      translate_startY = newY;
+      translate_startY = new_y_position;
    }
    
-   public static void SetBackground(AnchorPane newback)
+   public static void SetBackground(AnchorPane new_background)
    {
-      background = newback;
+      background = new_background;
    }
    
    public static boolean GetEdgeButton()
